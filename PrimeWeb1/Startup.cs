@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PrimeWeb1.Middleware;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,7 @@ namespace PrimeWeb1
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddTransient<PrimeService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,34 +45,35 @@ namespace PrimeWeb1
 
             app.UseHttpsRedirection();
             app.UseMvc();
-            app.Run(async (context) =>
-            {
-                if (context.Request.Path.Value.Contains("checkprime"))
-                {
-                    int numberToCheck;
-                    try
-                    {
-                        numberToCheck = int.Parse(context.Request.QueryString.Value.Replace("?", ""));
-                        var primeService = new PrimeService();
-                        if (primeService.IsPrime(numberToCheck))
-                        {
-                            await context.Response.WriteAsync(numberToCheck + " is prime!");
-                        }
-                        else
-                        {
-                            await context.Response.WriteAsync(numberToCheck + " is NOT prime!");
-                        }
-                    }
-                    catch
-                    {
-                        await context.Response.WriteAsync("Pass in a number to check in the form /checkprime?5");
-                    }
-                }
-                else
-                {
-                    await context.Response.WriteAsync("Hello World! To check if a number is prime, provide URL of the form /checkprime?5");
-                }
-            });
+            app.UsePrimeChecker();
+            //app.Run(async (context) =>
+            //{
+            //    if (context.Request.Path.Value.Contains("checkprime"))
+            //    {
+            //        int numberToCheck;
+            //        try
+            //        {
+            //            numberToCheck = int.Parse(context.Request.QueryString.Value.Replace("?", ""));
+            //            var primeService = new PrimeService();
+            //            if (primeService.IsPrime(numberToCheck))
+            //            {
+            //                await context.Response.WriteAsync(numberToCheck + " is prime!");
+            //            }
+            //            else
+            //            {
+            //                await context.Response.WriteAsync(numberToCheck + " is NOT prime!");
+            //            }
+            //        }
+            //        catch
+            //        {
+            //            await context.Response.WriteAsync("Pass in a number to check in the form /checkprime?5");
+            //        }
+            //    }
+            //    else
+            //    {
+            //        await context.Response.WriteAsync("Hello World! To check if a number is prime, provide URL of the form /checkprime?5");
+            //    }
+            //});
         }
     }
 }
